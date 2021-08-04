@@ -1,13 +1,54 @@
 # SALIENCE
 
-An Unsupervised User Adaptation Model for Multiple  Wearable Sensors Based Human Activity Recognition
-
-Unsupervised user adaptation aligns the feature distributions of the data from training users and the new user, so a well-trained wearable human activity recognition (WHAR) model can be well adapted to the new user. With the development of wearable sensors, multiple wearable sensors based WHAR is gaining more and more attention. In order to address the challenge that the transferabilities of different sensors are different, we propose SALIENCE (unsupervised user adaptation model for multiple wearable sensors based human activity recognition) model. It aligns the data of each sensor separately to achieve local alignment, while uniformly aligning the data of all sensors to ensure global alignment. In addition, an attention mechanism is proposed to focus the activity classifier of SALIENCE on the sensors with strong feature discrimination and well distribution alignment. Experiments are conducted on two public WHAR datasets, and the experimental results show that our model can yield a competitive performance.
+This repo is the official implementation for *An Unsupervised User Adaptation Model for Multiple  Wearable Sensors Based Human Activity Recognition*
 
 ## The framework of SALIENCE
 <div align=center>
 <img src="https://user-images.githubusercontent.com/50646282/128143924-866f1552-c1ec-4f27-a4f2-9a405aca2287.jpg" width="600" height="600" alt="framework"/><br/>
-<div align=center>
-
+<div align=left>
  
-  
+# Prerequisites
+- Python == 3.6.12
+- PyTorch == 1.2.0
+- math, sklearn, tensorboardX
+ 
+ # Data Preparation
+ ### Download datasets.
+ - PAMAP2: https://archive.ics.uci.edu/ml/datasets/PAMAP2+Physical+Activity+Monitoring
+ - OPPORTUNITY:  https://archive.ics.uci.edu/ml/datasets/OPPORTUNITY+Activity+Recognition
+
+ ### Data Processing
+Put downloaded data into the following directory structure:
+ ```python
+- data/
+  - Protocol/
+      ... # raw data of PAMAP2(e.g,subject101.dat)
+```
+ ### Generating Data
+
+- Generate PAMAP2 dataset:
+
+```python
+ cd data
+ # pre-precess for PAMAP2
+ python pre_process.py
+```
+# Training & Testing
+
+### Training
+
+- Change the config depending on what you want.
+```python
+cd ..
+python main.py --lr 0.0005
+```
+ 
+# Citation
+
+Please cite this work if you find it useful.
+
+
+# Contact
+For any questions, feel free to contact: `shmiao@zju.edu.cn`
+ 
+ 
