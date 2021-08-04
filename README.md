@@ -13,7 +13,7 @@ This repo is the official implementation for *An Unsupervised User Adaptation Mo
 - math, sklearn, tensorboardX
  
  # Data Preparation
- ### Download datasets.
+ ### Download datasets
  - PAMAP2: https://archive.ics.uci.edu/ml/datasets/PAMAP2+Physical+Activity+Monitoring
  - OPPORTUNITY:  https://archive.ics.uci.edu/ml/datasets/OPPORTUNITY+Activity+Recognition
 
@@ -40,7 +40,7 @@ Put downloaded data into the following directory structure:
 - Change the config depending on what you want.
 ```python
 cd ..
-python main.py --lr 0.0005
+python main.py --lr 0.0001
 ```
  
 # Citation
