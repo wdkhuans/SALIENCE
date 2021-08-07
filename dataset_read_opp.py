@@ -5,9 +5,16 @@ import numpy as np
 def one_hot( y, n_values ):
         return np.eye( n_values )[ np.array( y, dtype = np.int32 ) ]
 
-def return_dataset(test_user):
-    _dataset = data.PAMAP2()
+def return_dataset(test_user, dataset):
+    if dataset == 'opp':
+        _dataset = data.Opportunity()
+        print("Test Dataset is Opportunity")
+    else:
+        _dataset = data.PAMAP2()
+        print("Test Dataset is PAMAP2")
+        
     train_x, train_y, test_x, test_y = _dataset.load_data(test_user)
+    print('user {} is the test set'.format(test_user))
     train_x     = train_x.astype( np.float32 )
     train_ya    = train_y 
     train_yu    = np.full(train_ya.shape[0], 0) 
@@ -25,17 +32,15 @@ def return_dataset(test_user):
     test_ya = test_ya[adapt_size:]
     test_yu = test_yu[adapt_size:]
 
-    return train_x, train_ya, train_yu, adapt_x, adapt_ya, adapt_yu, test_x, test_ya, test_yu 
+    return train_x, train_ya, train_yu, adapt_x, adapt_ya, adapt_yu, test_x, test_ya, test_yu
 
-
-
-def dataset_read(batch_size, test_user=0): 
+def dataset_read(batch_size, test_user=0, dataset = 'opp'): 
     S = {}
     S_test = {}
     T = {}
     T_test = {}
 
-    train_x, train_ya, train_yu, adapt_x, adapt_ya, adapt_yu, test_x, test_ya, test_yu = return_dataset(test_user)
+    train_x, train_ya, train_yu, adapt_x, adapt_ya, adapt_yu, test_x, test_ya, test_yu = return_dataset(test_user, dataset)
     
     train_source = train_x
     s_label_train = train_ya
@@ -48,7 +53,7 @@ def dataset_read(batch_size, test_user=0):
     t_label_test = test_ya
 
 
-    S['imgs'] = train_source 
+    S['imgs'] = train_source
     S['labels'] = s_label_train
     T['imgs'] = train_target
     T['labels'] = t_label_train

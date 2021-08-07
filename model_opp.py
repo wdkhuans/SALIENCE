@@ -2,12 +2,13 @@
 """
 Created on Thu Dec 10 15:26:09 2020
 
-@author: 82045
+@author: Shenghuan Miao
 """
 import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from modelsummary import summary
 
 """ SALIENCE """
 class FeatureExtracter(nn.Module):
@@ -35,27 +36,7 @@ class FeatureExtracter(nn.Module):
         x = F.relu(self.bn3(self.conv3(x)))
         x = self.pool(x)
         x = x.permute(0, 2, 1)
-        return x   
-    
-class LocalDiscriminator(nn.Module):
-    def __init__(self, prob=0.5):
-        super( LocalDiscriminator, self ).__init__()    
-        self.prob = prob
-        self.lstm1 = nn.LSTM(input_size=16, hidden_size=64, bidirectional=True, num_layers=1)
-        self.out = nn.Linear(128, 2)
-        
-    def forward(self, x):
-        x = x.permute(1, 0, 2) 
-        
-        x = F.dropout(x, p=self.prob, training=self.training) 
-        x, (h_n,c_n) = self.lstm1(x)
-           
-        x = x[-1]
-        
-        x = F.dropout(x, p=self.prob, training=self.training)   
-        x = self.out(x)
-        return x      
-    
+        return x    
     
 class GlobalDiscriminator(nn.Module):
     def __init__(self, prob=0.5):
@@ -65,12 +46,12 @@ class GlobalDiscriminator(nn.Module):
         self.lstm2 = nn.LSTM(input_size=128, hidden_size=64, bidirectional=True, num_layers=1)
         self.out = nn.Linear(128, 2)
         
-    def forward(self, x): 
+    def forward(self, x):
         x = x.permute(1, 0, 2)
         
         x = F.dropout(x, p=self.prob, training=self.training) 
         x, (h_n,c_n) = self.lstm1(x)
-        
+
         x = F.dropout(x, p=self.prob, training=self.training) 
         x, (h_n,c_n) = self.lstm2(x)
            
@@ -79,48 +60,75 @@ class GlobalDiscriminator(nn.Module):
         x = F.dropout(x, p=self.prob, training=self.training)   
         x = self.out(x)
         return x        
-  
-
-class ActivityClassifier(nn.Module):
+    
+class LocalDiscriminator(nn.Module):
     def __init__(self, prob=0.5):
-        super( ActivityClassifier, self ).__init__()    
-        self.prob = prob
+        super( LocalDiscriminator, self ).__init__()    
         self.prob = prob
         self.lstm1 = nn.LSTM(input_size=16, hidden_size=64, bidirectional=True, num_layers=1)
-        self.lstm2 = nn.LSTM(input_size=128, hidden_size=64, bidirectional=True, num_layers=1)
-        self.out = nn.Linear(128, 12)
+        self.out = nn.Linear(128, 2)
         
     def forward(self, x):
         x = x.permute(1, 0, 2)
         
         x = F.dropout(x, p=self.prob, training=self.training) 
         x, (h_n,c_n) = self.lstm1(x)
+           
+        x = x[-1]
+        
+        x = F.dropout(x, p=self.prob, training=self.training)   
+        x = self.out(x)
+        return x    
+
+class ActivityClassifier(nn.Module):
+    def __init__(self, prob=0.5, dataset='pamap'):
+        super( ActivityClassifier, self ).__init__()    
+        self.prob = prob
+        self.lstm1 = nn.LSTM(input_size=16, hidden_size=64, bidirectional=True, num_layers=1)
+        self.lstm2 = nn.LSTM(input_size=128, hidden_size=64, bidirectional=True, num_layers=1)
+        if dataset == 'pamap':
+            self.out = nn.Linear(128, 12)
+        else:
+            self.out = nn.Linear(128, 5)
+        
+    def forward(self, x):       
+        x = x.permute(1, 0, 2)
         
         x = F.dropout(x, p=self.prob, training=self.training) 
-        x, (h_n,c_n) = self.lstm2(x)      
+        x, (h_n,c_n) = self.lstm1(x)
+
+        x = F.dropout(x, p=self.prob, training=self.training) 
+        x, (h_n,c_n) = self.lstm2(x)
            
         x = x[-1]
         
         x = F.dropout(x, p=self.prob, training=self.training)   
         x = self.out(x)
         return x 
-   
+
+
 class AttentionNetwork(nn.Module):
-    def __init__(self):
+    def __init__(self, dataset='pamap'):
         super(AttentionNetwork, self ).__init__()    
-        self.Q = nn.Linear(24, 24)
-        self.K = nn.Linear(336, 24)
+        if dataset == 'pamap':
+            self.Q = nn.Linear(24, 24)
+            self.K = nn.Linear(336, 24)
+            self.num = 12
+        else:
+            self.Q = nn.Linear(78, 78)
+            self.K = nn.Linear(544, 78)
+            self.num = 39
         
     def forward(self, local_features, concat_local_preds):  
         
-        input_feature = torch.stack([local_features[i].reshape(-1, local_features[i].shape[1]*local_features[i].shape[2]) for i in range(12)], 1) 
-        local_preds = concat_local_preds 
+        input_feature = torch.stack([local_features[i].reshape(-1, local_features[i].shape[1]*local_features[i].shape[2]) for i in range(self.num)], 1) 
+        local_preds = concat_local_preds
         
         query = self.Q(local_preds)
         key = self.K(input_feature)
-        score = torch.matmul(key, query.reshape(-1, query.shape[1], 1)) 
+        score = torch.matmul(key, query.reshape(-1, query.shape[1], 1))
         score = F.softmax(score / math.sqrt(query.size(-1)), dim = 1)
         score = score.reshape(-1, score.shape[1] * score.shape[2])
     
-        return score 
+        return score
     
