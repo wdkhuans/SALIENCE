@@ -1,6 +1,6 @@
 # 1 SALIENCE
 
-This repo is the official implementation for *An Unsupervised User Adaptation Model for Multiple  Wearable Sensors Based Human Activity Recognition*
+This repo is the official implementation for [*An Unsupervised User Adaptation Model for Multiple  Wearable Sensors Based Human Activity Recognition*](https://arxiv.org/abs/2108.10213)
 
 ## 1.1 The framework of SALIENCE
 <div align=center>
